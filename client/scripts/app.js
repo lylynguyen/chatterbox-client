@@ -4,20 +4,32 @@ var app = {
   chatRooms: {},
   init: function(){
     app.fetch();
-
   },
   addMessage: function (){
     var username = window.location.search.slice(10);
     var message = $('#newchat').val();
-    var room = $('#roomSelect').val();
+    var room = $('#roomSelect').val(); //room dropdown
+    var newRoom = $('#new-room-text').val();
     var messageObj = {
       username: username,
       text: message,
       roomname: room
     }
+    if(room === "add-new-room") {
+      if(newRoom === '') {
+        return;
+      }
+      messageObj.roomname = newRoom;
+    }
     console.log(messageObj);
     app.send(messageObj);
     $('#newchats').val('');
+
+    var $chat = $('<div></div>');
+    var messageTime = moment().format('MMM Do YYYY, h:mm:ss a');
+    $chat.html(messageObj.username+ " " + messageObj.text + " " + messageObj.roomname + " " + messageTime )
+    $chat.appendTo($('#chats'));
+
   },
   send: function(message){ 
     
@@ -35,7 +47,6 @@ var app = {
         console.error('chatterbox: Failed to send message');
       }
     });
-    // return "test";
   },
 
   fetch: function(){
@@ -61,14 +72,16 @@ var app = {
         }
         console.log('chatterbox: Message get');
         console.log(data);
+
+        //build drop down list for rooms
         var $roomDropDown = $('#roomSelect');
-    
         for(var key in app.chatRooms) {
           var $option = $('<option></option>');
           $option.html(app.chatRooms[key]);
           $option.appendTo($roomDropDown)
-          //console.log(key);
         }
+        var $option = $('<option value="add-new-room">Add new room</option>');
+        $option.appendTo($roomDropDown)
 
       },
       error: function (data) {
@@ -84,22 +97,35 @@ var app = {
   },
 
   addRoom: function(newRoom){
-    var roomname = $('#room').val();
-    app.send(roomname);
-    $('#newchats').val('');
+    // var roomname = $('#room').val();
+    // app.send(roomname);
+    // $('#newchats').val('');
+    var $roomDropDown = $('#roomSelect');
+    var $option = $('<option></option>');
+    $option.html(newRoom);
+    $option.appendTo($roomDropDown)
+  },
+
+  addFriend: function() {
+
   }
 
 };
 
 
-//app.fetch();
 
 $(document).ready(function(){
 
 app.init();
-//app.fetch();
 $('#submit-chat').on('click', app.addMessage)
 $('#clear-chat').on('click', app.clearMessages)
+$('#roomSelect').on('change', function(){
+  if($(this).val() === "add-new-room") {
+    $('#room-input').show();
+  } else {
+    $('#room-input').hide();
 
+  }
+})
 })
 
