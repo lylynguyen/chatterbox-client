@@ -8,6 +8,7 @@
     <!-- dependencies -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
     <!-- your scripts -->
     <script src="env/config.js"></script>
     <script src="scripts/app.js"></script>
@@ -15,8 +16,20 @@
   <body>
     <div id="main">
       <h1>chatterbox</h1>
-      <!-- Your HTML goes here! -->
     </div>
-    <div id="chats"></div>
+    <div>
+      <h2>Room</h2>
+      <textarea id="newchat"></textarea>
+      <button type=button id="submit-chat">Submit</button>
+    </div>
+    <div>
+      <textarea id="newchat"></textarea>
+      <button type=button id="submit-chat">Submit</button>
+    </div>
+    <button type=button id="clear-chat">Clear Chats</button>
+    <div id="chats">
+      
+    </div>
+
   </body>
 </html>
