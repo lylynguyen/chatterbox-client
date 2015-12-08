@@ -3,34 +3,46 @@ var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
   chatRooms: {},
   init: function(){
-    app.fetch();
+    //app.fetch();
   },
-  addMessage: function (){
-    var username = window.location.search.slice(10);
-    var message = $('#newchat').val();
-    var room = $('#roomSelect').val(); //room dropdown
-    var newRoom = $('#new-room-text').val();
-    var messageObj = {
-      username: username,
-      text: message,
-      roomname: room
-    }
-    if(room === "add-new-room") {
-      if(newRoom === '') {
-        return;
+  addMessage: function (message){
+    
+    //if message is provided
+    if(message){
+      //send message
+      app.send(message);
+      //select the div
+      var $chat = $('<div></div>');
+      //attaching message to the dom
+      $chat.html('<a href class="username">'+ message.username + '</a>'+ " " + message.text + " " + message.roomname /*+ " " + messageTime*/ )
+      //appending to id with chats
+      $chat.appendTo($('#chats'));
+    } else{
+      var username = window.location.search.slice(10);
+      var message = $('#newchat').val();
+      var room = $('#roomSelect').val(); //room dropdown
+      var newRoom = $('#new-room-text').val();
+      //creating message base on the inouts we get from users
+      var messageObj = {
+        username: username,
+        text: message,
+        roomname: room
       }
-      messageObj.roomname = newRoom;
+      //check for when user doesn't input a roomname
+      if(room === "add-new-room") {
+        if(newRoom === '') {
+          return;
+        }
+        messageObj.roomname = newRoom;
+      }
+      var $chat = $('<div></div>');
+      //attaching message to the dom
+      $chat.html('<a href class="username">'+ messageObj.username + '</a>'+ " " + messageObj.text + " " + messageObj.roomname /*+ " " + messageTime*/ )
+      //appending to id with chats
+      $chat.appendTo($('#chats'));
     }
-    console.log(messageObj);
-    app.send(messageObj);
-    $('#newchats').val('');
-
-    var $chat = $('<div></div>');
-    var messageTime = moment().format('MMM Do YYYY, h:mm:ss a');
-    $chat.html(messageObj.username+ " " + messageObj.text + " " + messageObj.roomname + " " + messageTime )
-    $chat.appendTo($('#chats'));
-
   },
+  //function to send message
   send: function(message){ 
     
     $.ajax({
@@ -67,7 +79,7 @@ var app = {
           if(!app.chatRooms[currentRoom] && currentRoom !== undefined && currentRoom !== null){
             app.chatRooms[currentRoom] = currentRoom; 
           }
-          $chat.html(currentChat.username+ " " + escapeText + " " + currentChat.roomname + " " + chatTime);
+          $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
           $chat.appendTo($('#chats'));
         }
         console.log('chatterbox: Message get');
@@ -107,25 +119,44 @@ var app = {
   },
 
   addFriend: function() {
+    //return true;
+    console.log("add Freind")
+  },
 
+  handleSubmit: function () {
+    app.addMessage()
   }
 
 };
 
 
 
-$(document).ready(function(){
 
+
+$(document).ready(function(){
 app.init();
-$('#submit-chat').on('click', app.addMessage)
+app.addFriend();
+
+ app.addMessage({
+          username: 'Mel Brooks',
+          text: 'I didn\'t get a harumph outa that guy.!',
+          roomname: 'lobby'
+        });
+
+$('.username').on('click', app.addFriend);
+//$('.submit').on('click', app.addMessage);
+$('.submit').on('click', app.addMessage);
+// $('.submit').submit(app.addMessage);
+
+//$('#submit-chat').on('click', app.addMessage)
 $('#clear-chat').on('click', app.clearMessages)
 $('#roomSelect').on('change', function(){
   if($(this).val() === "add-new-room") {
     $('#room-input').show();
   } else {
     $('#room-input').hide();
-
   }
 })
+
 })
 

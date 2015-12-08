@@ -28,8 +28,12 @@
       </div>
     </div>
     <div>
-      <textarea id="newchat"></textarea>
-      <button type=button id="submit-chat">Submit</button>
+      <!-- <textarea id="newchat"></textarea>
+      <button type=button id="submit-chat">Submit</button> -->
+      <form action="#" id="send" method="post">
+        <input type="text" name="message" id="message"/>
+        <input type="submit" name="submit" class="submit"/>
+      </form>
     </div>
     <button type=button id="clear-chat">Clear Chats</button>
     <div id="chats">
@@ -38,3 +42,8 @@
 
   </body>
 </html>
+
+<!-- <form action="#" id="send" method="post">
+      <input type="text" name="message" id="message"/>
+      <input type="submit" name="submit" class="submit"/>
+    </form> -->
