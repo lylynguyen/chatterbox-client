@@ -109,9 +109,7 @@ var app = {
   },
 
   addRoom: function(newRoom){
-    // var roomname = $('#room').val();
-    // app.send(roomname);
-    // $('#newchats').val('');
+  
     var $roomDropDown = $('#roomSelect');
     var $option = $('<option></option>');
     $option.html(newRoom);
@@ -119,7 +117,6 @@ var app = {
   },
 
   addFriend: function() {
-    //return true;
     console.log("add Freind")
   },
 
@@ -137,11 +134,6 @@ $(document).ready(function(){
 app.init();
 app.addFriend();
 
- app.addMessage({
-          username: 'Mel Brooks',
-          text: 'I didn\'t get a harumph outa that guy.!',
-          roomname: 'lobby'
-        });
 
 $('.username').on('click', app.addFriend);
 //$('.submit').on('click', app.addMessage);
@@ -157,6 +149,8 @@ $('#roomSelect').on('change', function(){
     $('#room-input').hide();
   }
 })
+setInterval(app.fetch, 1000);
 
 })
+
 
