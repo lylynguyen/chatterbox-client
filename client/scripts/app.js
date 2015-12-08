@@ -1,23 +1,27 @@
-// YOUR CODE HERE:
+
+  // YOUR CODE HERE:
+
+
 var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
   chatRooms: {},
+  dataChat: [],
   init: function(){
-    //app.fetch();
+    app.fetch();
   },
   addMessage: function (message){
-    
+   console.log('click'); 
     //if message is provided
-    if(message){
-      //send message
-      app.send(message);
-      //select the div
-      var $chat = $('<div></div>');
-      //attaching message to the dom
-      $chat.html('<a href class="username">'+ message.username + '</a>'+ " " + message.text + " " + message.roomname /*+ " " + messageTime*/ )
-      //appending to id with chats
-      $chat.appendTo($('#chats'));
-    } else{
+    // if(message){
+    //   //send message
+    //   app.send(message);
+    //   //select the div
+    //   var $chat = $('<div></div>');
+    //   //attaching message to the dom
+    //   $chat.html('<a href class="username">'+ message.username + '</a>'+ " " + message.text + " " + message.roomname /*+ " " + messageTime*/ )
+    //   //appending to id with chats
+    //   $chat.appendTo($('#chats'));
+    // } else{
       var username = window.location.search.slice(10);
       var message = $('#newchat').val();
       var room = $('#roomSelect').val(); //room dropdown
@@ -35,12 +39,14 @@ var app = {
         }
         messageObj.roomname = newRoom;
       }
+      console.log(messageObj)
+      app.send(messageObj);
       var $chat = $('<div></div>');
       //attaching message to the dom
       $chat.html('<a href class="username">'+ messageObj.username + '</a>'+ " " + messageObj.text + " " + messageObj.roomname /*+ " " + messageTime*/ )
       //appending to id with chats
       $chat.appendTo($('#chats'));
-    }
+    //}
   },
   //function to send message
   send: function(message){ 
@@ -61,8 +67,44 @@ var app = {
     });
   },
 
-  fetch: function(){
-    
+  filterByRoom: function(room){
+    // dataChat = data.results;
+    var $chat = $('#chats');
+    $chat.html('');
+    for(var i = 0; i < dataChat.length; i++){
+      //getting the chat div
+      var $chat = $('<div></div>');
+      //accesss current chat index i
+      var currentChat = dataChat[i];
+      //track time of message 
+      var chatTime = moment(currentChat.createdAt).format('MMM Do YYYY, h:mm:ss a');
+      //remove special characters
+      var escapeText = _.escape(currentChat.text);
+      var currentRoom = currentChat.roomname;
+      
+
+
+      if(!app.chatRooms[currentRoom] && currentRoom !== undefined && currentRoom !== null){
+        app.chatRooms[currentRoom] = currentRoom; 
+      }
+      if(room === 'allrooms'){
+         $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
+        //attach to the chats tag
+        $chat.appendTo($('#chats'));
+      } else {
+        if(currentRoom === room){
+          $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
+          //attach to the chats tag
+          $chat.appendTo($('#chats'));
+        } 
+      }
+    }//return html content for messsage
+  },
+
+  fetch: function(roomname){
+    // var $rooms = $('#rooms');
+    // $rooms.html('');
+    var roomname = roomname || 'allrooms';
     $.ajax({
     //  This is the url you should use to communicate with the parse API server.
       url: app.server,
@@ -70,23 +112,24 @@ var app = {
       //data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
-        for(var i = 0; i < data.results.length; i++){
-          var $chat = $('<div></div>');
-          var currentChat = data.results[i];
-          var chatTime = moment(currentChat.createdAt).format('MMM Do YYYY, h:mm:ss a');
-          var escapeText = _.escape(currentChat.text);
-          var currentRoom = currentChat.roomname;
-          if(!app.chatRooms[currentRoom] && currentRoom !== undefined && currentRoom !== null){
-            app.chatRooms[currentRoom] = currentRoom; 
-          }
-          $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
-          $chat.appendTo($('#chats'));
-        }
+        //storinf results into a new array to create friends list
+        dataChat = data.results;
+        app.filterByRoom(roomname);
         console.log('chatterbox: Message get');
         console.log(data);
 
         //build drop down list for rooms
         var $roomDropDown = $('#roomSelect');
+        $roomDropDown.html('');
+        if(roomname === 'allrooms'){
+          var $option = $('<option value="allrooms">allrooms</option>'); 
+          $option.appendTo($roomDropDown)
+        } else {
+          roomname = roomname.split(' ').join('&nbsp');
+          console.log(roomname);
+          var $option = $('<option value='+roomname+'>'+roomname+'</option>'); 
+          $option.appendTo($roomDropDown)
+        }
         for(var key in app.chatRooms) {
           var $option = $('<option></option>');
           $option.html(app.chatRooms[key]);
@@ -121,36 +164,54 @@ var app = {
   },
 
   handleSubmit: function () {
-    app.addMessage()
+    app.addMessage();
+  }, 
+
+  refresh: function (argument) {
+    console.log("refreshed!")
+    var $selectedRoom = $('#roomSelect').val();
+    app.fetch($selectedRoom);
+
   }
 
 };
 
 
-
-
-
 $(document).ready(function(){
-app.init();
-app.addFriend();
+  app.init();
+  //app.addFriend();
+
+  $('.username').on('click', app.addFriend);
+  $('#submit-chat').on('click', app.addMessage);
+
+  $('#clear-chat').on('click', app.clearMessages)
+  
+  $('#roomSelect').on('change', function(){
+    //will give us the value of the dropdown menu
+    if($(this).val() === "add-new-room") {
+      $('#room-input').show();
+    } else {
+      $('#room-input').hide();
+      //filterby room will be call if roomname is selected
+      app.filterByRoom($(this).val());
+    }
+  });
+  $('#refresh').on('click', function(event){
+    event.stopPropagation();
+    app.refresh();
+  });
+});
 
 
-$('.username').on('click', app.addFriend);
-//$('.submit').on('click', app.addMessage);
-$('.submit').on('click', app.addMessage);
-// $('.submit').submit(app.addMessage);
+  var escapeMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '`': '&#x60;',
+    ' ': '%20'
+  };
 
-//$('#submit-chat').on('click', app.addMessage)
-$('#clear-chat').on('click', app.clearMessages)
-$('#roomSelect').on('change', function(){
-  if($(this).val() === "add-new-room") {
-    $('#room-input').show();
-  } else {
-    $('#room-input').hide();
-  }
-})
-setInterval(app.fetch, 1000);
-
-})
 
 
