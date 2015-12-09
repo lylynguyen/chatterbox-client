@@ -17,28 +17,33 @@
     <div id="main">
       <h1>chatterbox</h1>
     </div>
-    <div id="rooms">
-      <select id="roomSelect">
-      <!-- <option value="allrooms">All rooms</option>  -->
-      </select>
-      <div id="room-input" style="display:none">
-        <label for="new-room">Room</label>
-        <input type="text" id="new-room-text">
-        <!--<button type=button id="room-submit">Add Room</button> -->
-      </div>
+    <div id="chats"> 
     </div>
-    <div>
-      <textarea id="newchat"></textarea>
-      <button type=button id="submit-chat">Submit</button>
+
+    <div id="sidebar">sidebar
+      <div id="button-div">
+        <span id="rooms">
+        <select id="roomSelect">
+      <!-- <option value="allrooms">All rooms</option>  -->
+        </select>
+        <div id="room-input" style="display:none">
+          <label for="new-room">Room</label>
+          <input type="text" id="new-room-text">
+        <!--<button type=button id="room-submit">Add Room</button> -->
+        </div>
+        </span>
+        <span>
+        <textarea id="newchat"></textarea>
+        <button type=button id="submit-chat">Submit</button>
       <!-- <form action="#" id="send" method="post">
         <input type="text" name="message" id="message"/>
         <input type="submit" name="submit" class="submit"/>
       </form> -->
-    </div>
-    <button type=button id="refresh">Refresh</button>
-    <button type=button id="clear-chat">Clear Chats</button>
-    <div id="chats">
-      
+        </span>
+        <button type=button id="refresh">Refresh</button>
+        <button type=button id="clear-chat">Clear Chats</button>
+      </div>
+      <div id="friends-div">friends</div>
     </div>
 
   </body>

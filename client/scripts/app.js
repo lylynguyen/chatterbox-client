@@ -6,22 +6,13 @@ var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
   chatRooms: {},
   dataChat: [],
+  friends: {},
+
   init: function(){
     app.fetch();
   },
   addMessage: function (message){
-   console.log('click'); 
-    //if message is provided
-    // if(message){
-    //   //send message
-    //   app.send(message);
-    //   //select the div
-    //   var $chat = $('<div></div>');
-    //   //attaching message to the dom
-    //   $chat.html('<a href class="username">'+ message.username + '</a>'+ " " + message.text + " " + message.roomname /*+ " " + messageTime*/ )
-    //   //appending to id with chats
-    //   $chat.appendTo($('#chats'));
-    // } else{
+   
       var username = window.location.search.slice(10);
       var message = $('#newchat').val();
       var room = $('#roomSelect').val(); //room dropdown
@@ -88,17 +79,65 @@ var app = {
         app.chatRooms[currentRoom] = currentRoom; 
       }
       if(room === 'allrooms'){
-         $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
+          var $innerSpan = $('<span></span>');
+          if(currentChat.username !== undefined){
+            currentChat.username = currentChat.username.replace(/%20| /g, ' ');            
+          }
+          $innerSpan.text(_.escape(currentChat.username));
+          $innerSpan.attr('class', 'username');
+          var $outerDiv = $('<div></div>');
+          $outerDiv.text(escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
+          $innerSpan.prependTo($outerDiv);
+          $chat.html('<span class="username">'+_.escape(currentChat.username) + '</span>' + " " + escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
         //attach to the chats tag
-        $chat.appendTo($('#chats'));
+        //$chat.attr('value', roomname);
+        $outerDiv.appendTo($('#chats'));
       } else {
         if(currentRoom === room){
-          $chat.html('<a href class="username">'+currentChat.username + '</a>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
+          $chat.html('<span class="username">'+currentChat.username + '</span>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
           //attach to the chats tag
-          $chat.appendTo($('#chats'));
+          $chat.Pre($('#chats'));
         } 
       }
     }//return html content for messsage
+  },
+
+  filterByFriends: function(friend){
+        // dataChat = data.results;
+    var $chat = $('#chats');
+    $chat.html('');
+    for(var i = 0; i < dataChat.length; i++){
+      //getting the chat div
+      var $chat = $('<div></div>');
+      //accesss current chat index i
+      var currentChat = dataChat[i];
+      //track time of message 
+      var chatTime = moment(currentChat.createdAt).format('MMM Do YYYY, h:mm:ss a');
+      //remove special characters
+      var escapeText = _.escape(currentChat.text);
+      var currentRoom = currentChat.roomname;
+      
+
+
+      if(!app.chatRooms[currentRoom] && currentRoom !== undefined && currentRoom !== null){
+        app.chatRooms[currentRoom] = currentRoom; 
+      }
+      if(friend === dataChat[i].username){
+          var $innerSpan = $('<span></span>');
+          if(currentChat.username !== undefined){
+            currentChat.username = currentChat.username.replace(/%20| /g, ' ');            
+          }
+          $innerSpan.text(_.escape(currentChat.username));
+          $innerSpan.attr('class', 'username');
+          var $outerDiv = $('<div></div>');
+          $outerDiv.text(escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
+          $innerSpan.prependTo($outerDiv);
+          $chat.html('<span class="username">'+_.escape(currentChat.username) + '</span>' + " " + escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
+ 
+        $outerDiv.appendTo($('#chats'));
+  
+      }
+    }
   },
 
   fetch: function(roomname){
@@ -125,9 +164,10 @@ var app = {
           var $option = $('<option value="allrooms">allrooms</option>'); 
           $option.appendTo($roomDropDown)
         } else {
-          roomname = roomname.split(' ').join('&nbsp');
+          //roomname = roomname.split(' ').join('&nbsp');
           console.log(roomname);
-          var $option = $('<option value='+roomname+'>'+roomname+'</option>'); 
+          var $option = $('<option value=>'+roomname+'</option>')
+          $option.attr('value', roomname); //sets the the value to the roomname
           $option.appendTo($roomDropDown)
         }
         for(var key in app.chatRooms) {
@@ -159,8 +199,21 @@ var app = {
     $option.appendTo($roomDropDown)
   },
 
-  addFriend: function() {
-    console.log("add Freind")
+  addFriend: function(friend) {
+    // console.log("add Freind")
+    //function will building a list of friends
+    if(!app.friends[friend]){
+      app.friends[friend] = friend;
+    }
+    var $friends = $('#friends-div');
+    $friends.html('');
+    for(var key in app.friends){
+     var $currentFriend = $('<div></div>');
+     $currentFriend.html(app.friends[key]);
+     console.log($currentFriend);
+     $currentFriend.attr('class', 'my-friend');
+     $currentFriend.appendTo($friends);
+    }
   },
 
   handleSubmit: function () {
@@ -174,14 +227,15 @@ var app = {
 
   }
 
+  
+
 };
 
 
 $(document).ready(function(){
   app.init();
-  //app.addFriend();
 
-  $('.username').on('click', app.addFriend);
+  $(document).on('click', '.username', function() {app.addFriend($(this).text())})//app.addFriend);
   $('#submit-chat').on('click', app.addMessage);
 
   $('#clear-chat').on('click', app.clearMessages)
@@ -200,18 +254,9 @@ $(document).ready(function(){
     event.stopPropagation();
     app.refresh();
   });
+  $(document).on('click', '.my-friend', function() {app.filterByFriends($(this).text())});
 });
 
-
-  var escapeMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '`': '&#x60;',
-    ' ': '%20'
-  };
 
 
 
