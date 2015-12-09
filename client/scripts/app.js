@@ -79,30 +79,28 @@ var app = {
         app.chatRooms[currentRoom] = currentRoom; 
       }
       if(room === 'allrooms'){
-          var $innerSpan = $('<span></span>');
+          var $innerSpan = $('<span><strong></strong></span>');
           if(currentChat.username !== undefined){
             currentChat.username = currentChat.username.replace(/%20| /g, ' ');            
           }
-          $innerSpan.text(_.escape(currentChat.username));
+          $innerSpan.text("@" + _.escape(currentChat.username));
           $innerSpan.attr('class', 'username');
           var $outerDiv = $('<div></div>');
-          $outerDiv.text(escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
-          $innerSpan.prependTo($outerDiv);
-          $chat.html('<span class="username">'+_.escape(currentChat.username) + '</span>' + " " + escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
-        //attach to the chats tag
-        //$chat.attr('value', roomname);
-        $outerDiv.appendTo($('#chats'));
+          $outerDiv.text(": " + escapeText + " " + _.escape(currentChat.roomname) + " " + chatTime);
+          $innerSpan.prependTo($outerDiv);        
+          $outerDiv.appendTo($('#chats'));
       } else {
         if(currentRoom === room){
-          $chat.html('<span class="username">'+currentChat.username + '</span>' + " " + escapeText + " " + currentChat.roomname + " " + chatTime);
-          //attach to the chats tag
-          $chat.Pre($('#chats'));
+          $chat.html('<span class="username">'+currentChat.username + '</span>' +": " + escapeText + " " + currentChat.roomname + " " + chatTime);
+          
+          $chat.appendTo($('#chats'));       
         } 
       }
     }//return html content for messsage
   },
 
-  filterByFriends: function(friend){
+
+  filterByFriends: function(friend, room, friend){
         // dataChat = data.results;
     var $chat = $('#chats');
     $chat.html('');
@@ -117,8 +115,6 @@ var app = {
       var escapeText = _.escape(currentChat.text);
       var currentRoom = currentChat.roomname;
       
-
-
       if(!app.chatRooms[currentRoom] && currentRoom !== undefined && currentRoom !== null){
         app.chatRooms[currentRoom] = currentRoom; 
       }
